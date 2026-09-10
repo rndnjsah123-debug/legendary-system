@@ -11,5 +11,13 @@ if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
 export const supabaseAdmin = createClient(
   process.env.SUPABASE_URL || "",
   process.env.SUPABASE_SERVICE_ROLE_KEY || "",
-  { auth: { persistSession: false } }
+  {
+    auth: { persistSession: false },
+    // Next.js/Vercel의 fetch 캐싱 계층을 완전히 우회하기 위해
+    // Supabase가 내부적으로 사용하는 fetch에 명시적으로 no-store를 강제합니다.
+    global: {
+      fetch: (input: RequestInfo | URL, init: RequestInit = {}) =>
+        fetch(input, { ...init, cache: "no-store" }),
+    },
+  }
 );
