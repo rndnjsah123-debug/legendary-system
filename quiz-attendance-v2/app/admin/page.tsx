@@ -9,7 +9,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch("/api/admin/check")
+    fetch("/api/admin/check", { cache: "no-store" })
       .then((r) => r.json())
       .then((d) => setAuthed(!!d.authed))
       .catch(() => setAuthed(false));

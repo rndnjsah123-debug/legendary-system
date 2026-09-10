@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "../../../lib/supabaseAdmin";
 
+export const dynamic = "force-dynamic";
+
 const MIN_MC_CORRECT = 2;
 
 export async function POST(req: Request) {

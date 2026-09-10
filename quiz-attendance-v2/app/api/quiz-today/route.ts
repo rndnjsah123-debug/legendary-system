@@ -35,16 +35,19 @@ export async function GET() {
     return NextResponse.json({ error: "데이터를 불러오지 못했습니다." }, { status: 500 });
   }
 
-  return NextResponse.json({
-    date,
-    students: students || [],
-    quiz: quiz
-      ? {
-          date: quiz.quiz_date,
-          session: quiz.session,
-          title: quiz.title,
-          questions: (quiz.questions || []).map(stripAnswers),
-        }
-      : null,
-  });
+  return NextResponse.json(
+    {
+      date,
+      students: students || [],
+      quiz: quiz
+        ? {
+            date: quiz.quiz_date,
+            session: quiz.session,
+            title: quiz.title,
+            questions: (quiz.questions || []).map(stripAnswers),
+          }
+        : null,
+    },
+    { headers: { "Cache-Control": "no-store, max-age=0, must-revalidate" } }
+  );
 }

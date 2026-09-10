@@ -110,7 +110,7 @@ function QuizTab({ showToast }: { showToast: (m: string) => void }) {
   const load = useCallback(async (d: string) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/quiz?date=${d}`);
+      const res = await fetch(`/api/admin/quiz?date=${d}`, { cache: "no-store" });
       const data = await res.json();
       if (data.quiz) {
         setTitle(data.quiz.title || "오늘의 퀴즈");
@@ -370,7 +370,7 @@ function StudentsTab({ showToast }: { showToast: (m: string) => void }) {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const res = await fetch("/api/admin/students");
+    const res = await fetch("/api/admin/students", { cache: "no-store" });
     const data = await res.json();
     setStudents(data.students || []);
     setLoading(false);
@@ -460,7 +460,7 @@ function AttendanceTab() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const res = await fetch("/api/admin/attendance");
+    const res = await fetch("/api/admin/attendance", { cache: "no-store" });
     setData(await res.json());
     setLoading(false);
   }, []);

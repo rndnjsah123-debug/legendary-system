@@ -27,7 +27,7 @@ export default function Home() {
   const [err, setErr] = useState("");
 
   useEffect(() => {
-    fetch("/api/quiz-today")
+    fetch("/api/quiz-today", { cache: "no-store" })
       .then((r) => r.json())
       .then((d) => {
         setQuiz(d.quiz);

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "../../../../lib/supabaseAdmin";
 import { requireAdmin } from "../../../../lib/requireAdmin";
 
+export const dynamic = "force-dynamic";
+
 const TOTAL_SESSIONS = 8;
 
 export async function GET() {
