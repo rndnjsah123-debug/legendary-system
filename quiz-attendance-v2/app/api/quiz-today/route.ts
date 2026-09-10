@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "../../../lib/supabaseAdmin";
 
+// 매 요청마다 최신 퀴즈를 조회하도록 캐싱을 끕니다.
+// (이게 없으면 배포 후 첫 응답이 그대로 캐시되어 새 퀴즈를 등록해도 반영되지 않습니다.)
+export const dynamic = "force-dynamic";
+
 function todayKST() {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Seoul",
