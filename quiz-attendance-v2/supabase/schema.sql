@@ -25,6 +25,7 @@ create table if not exists submissions (
   student_id uuid not null references students(id) on delete cascade,
   score int not null default 0,
   attended boolean not null default false,
+  answers jsonb not null default '{}'::jsonb,
   submitted_at timestamptz default now(),
   unique (quiz_date, student_id)
 );

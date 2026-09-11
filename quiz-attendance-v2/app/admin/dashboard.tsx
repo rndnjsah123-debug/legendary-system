@@ -457,6 +457,7 @@ function StudentsTab({ showToast }: { showToast: (m: string) => void }) {
 function AttendanceTab() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>(null);
+  const [exporting, setExporting] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -499,6 +500,44 @@ function AttendanceTab() {
     URL.revokeObjectURL(a.href);
   }
 
+  function csvField(v: any) {
+    const s = String(v ?? "");
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+
+  async function downloadAnswersCSV() {
+    setExporting(true);
+    try {
+      const res = await fetch("/api/admin/answers", { cache: "no-store" });
+      const answerData = await res.json();
+      const answerRows = answerData.rows || [];
+      const header = [
+        "회차", "날짜", "퀴즈 제목", "학생", "문제번호", "문제유형",
+        "문제", "학생 답안", "정답", "채점 결과", "총점", "출석여부",
+      ];
+      const lines = [header.map(csvField).join(",")];
+      answerRows.forEach((r: any) => {
+        lines.push(
+          [
+            r.session, r.quizDate, r.quizTitle, r.studentName, r.questionNo, r.questionType,
+            r.questionText, r.studentAnswer, r.correctAnswer,
+            r.isCorrect === null ? "-" : r.isCorrect ? "정답" : "오답",
+            r.score, r.attended ? "인정" : "미인정",
+          ].map(csvField).join(",")
+        );
+      });
+      const csv = "\uFEFF" + lines.join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "교리학교_답안상세.csv";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } finally {
+      setExporting(false);
+    }
+  }
+
   return (
     <div>
       <div className="qa-row-between qa-section">
@@ -510,12 +549,15 @@ function AttendanceTab() {
             전체 {totalSessions}회차 중 {sessionsUsed}회차 진행됨 · 같은 회차의 목/화 날짜는 자동 합산
           </span>
         </div>
-        <div style={{ display: "flex", gap: 6 }}>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
           <button className="qa-btn qa-btn-sec qa-btn-sm" onClick={load}>
             새로고침
           </button>
           <button className="qa-btn qa-btn-sm" onClick={downloadCSV}>
-            CSV
+            출석 CSV
+          </button>
+          <button className="qa-btn qa-btn-sm" onClick={downloadAnswersCSV} disabled={exporting}>
+            {exporting ? "생성 중..." : "답안 상세 CSV"}
           </button>
         </div>
       </div>

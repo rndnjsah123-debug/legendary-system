@@ -67,6 +67,7 @@ export async function POST(req: Request) {
     student_id: studentId,
     score,
     attended,
+    answers,
   });
   if (insertErr) {
     return NextResponse.json({ error: "저장 중 문제가 발생했습니다." }, { status: 500 });
