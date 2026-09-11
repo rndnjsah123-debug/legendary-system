@@ -491,6 +491,15 @@ function AttendanceTab() {
       const cells = Array.from({ length: totalSessions }, (_, i) => (r.attended[i] ? "O" : ""));
       lines.push([r.name, ...cells, r.count]);
     });
+    const totalCells = Array.from({ length: totalSessions }, (_, i) => {
+      const held = (sessionDates[i]?.length || 0) > 0;
+      return held ? rows.filter((r: any) => r.attended[i]).length : "";
+    });
+    lines.push([
+      "합계(출석 인원)",
+      ...totalCells,
+      rows.reduce((sum: number, r: any) => sum + r.count, 0),
+    ]);
     const csv = "\uFEFF" + lines.map((r) => r.join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const a = document.createElement("a");
@@ -594,6 +603,19 @@ function AttendanceTab() {
                 </tr>
               ))}
             </tbody>
+            <tfoot>
+              <tr className="qa-total-row">
+                <td className="name-cell">합계 (출석 인원)</td>
+                {Array.from({ length: totalSessions }, (_, i) => {
+                  const held = (sessionDates[i]?.length || 0) > 0;
+                  const total = rows.filter((r: any) => r.attended[i]).length;
+                  return <td key={i}>{held ? `${total}명` : "-"}</td>;
+                })}
+                <td>
+                  {rows.reduce((sum: number, r: any) => sum + r.count, 0)}명
+                </td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       )}

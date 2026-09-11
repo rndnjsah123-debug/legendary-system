@@ -122,6 +122,8 @@ table.qa-table th{background:var(--paper);color:var(--navy-900);font-weight:700}
 table.qa-table td.name-cell{text-align:left;font-weight:600;white-space:nowrap}
 .qa-dot-yes{color:var(--navy-700);font-weight:900}
 .qa-dot-no{color:var(--ink-faint)}
+.qa-table tfoot td{background:var(--gold-100);color:var(--navy-900);font-weight:700;border-top:2px solid var(--gold-500)}
+.qa-table tfoot td.name-cell{text-align:left}
 
 .qa-student-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line);gap:10px;flex-wrap:wrap}
 .qa-student-row:last-child{border-bottom:none}
