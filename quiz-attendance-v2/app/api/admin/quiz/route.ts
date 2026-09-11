@@ -22,7 +22,13 @@ export async function GET(req: Request) {
 
   return NextResponse.json({
     quiz: quiz
-      ? { date: quiz.quiz_date, session: quiz.session, title: quiz.title, questions: quiz.questions }
+      ? {
+          date: quiz.quiz_date,
+          session: quiz.session,
+          title: quiz.title,
+          questions: quiz.questions,
+          isOpen: !!quiz.is_open,
+        }
       : null,
     submissions: (subs || []).map((s: any) => ({
       studentId: s.student_id,
@@ -43,7 +49,7 @@ export async function POST(req: Request) {
   } catch {
     return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
   }
-  const { date, session, title, questions } = body || {};
+  const { date, session, title, questions, isOpen } = body || {};
   if (!date || !session || !Array.isArray(questions)) {
     return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
   }
@@ -53,8 +59,26 @@ export async function POST(req: Request) {
     session,
     title: title || "오늘의 퀴즈",
     questions,
+    is_open: typeof isOpen === "boolean" ? isOpen : false,
     updated_at: new Date().toISOString(),
   });
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ ok: true });
+}
+
+// 문제 내용은 건드리지 않고 게시 여부만 빠르게 켜고 끄기 위한 전용 엔드포인트
+export async function PATCH(req: Request) {
+  if (!(await requireAdmin())) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+  const { date, isOpen } = (await req.json().catch(() => ({}))) || {};
+  if (!date || typeof isOpen !== "boolean") {
+    return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
+  }
+  const { error } = await supabaseAdmin
+    .from("quizzes")
+    .update({ is_open: isOpen, updated_at: new Date().toISOString() })
+    .eq("quiz_date", date);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }

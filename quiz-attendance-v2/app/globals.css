@@ -106,6 +106,7 @@ select.qa-select:focus{outline:none;border-color:var(--navy-500)}
 
 .qa-card{background:#fff;border:1px solid var(--line);border-left:4px solid var(--navy-700);
   border-radius:10px;padding:18px}
+.qa-publish-card{border-left-color:var(--gold-500);margin-bottom:16px}
 .qa-row-between{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .qa-muted{color:var(--ink-muted);font-size:13.5px}
 .qa-textarea{width:100%;min-height:64px;padding:11px 13px;border:1.5px solid var(--line);border-radius:9px;

@@ -15,6 +15,7 @@ create table if not exists quizzes (
   session int not null check (session between 1 and 8),
   title text not null default '오늘의 퀴즈',
   questions jsonb not null default '[]'::jsonb,
+  is_open boolean not null default false,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );

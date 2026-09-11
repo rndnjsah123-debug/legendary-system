@@ -25,6 +25,9 @@ export async function POST(req: Request) {
   if (quizErr || !quiz) {
     return NextResponse.json({ error: "오늘 등록된 퀴즈가 없습니다." }, { status: 404 });
   }
+  if (!quiz.is_open) {
+    return NextResponse.json({ error: "현재 이 퀴즈는 게시되지 않았습니다." }, { status: 403 });
+  }
 
   // 이미 제출했는지 확인
   const { data: existing } = await supabaseAdmin

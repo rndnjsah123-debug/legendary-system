@@ -35,11 +35,13 @@ export async function GET() {
     return NextResponse.json({ error: "데이터를 불러오지 못했습니다." }, { status: 500 });
   }
 
+  const isOpen = !!(quiz && quiz.is_open);
+
   return NextResponse.json(
     {
       date,
       students: students || [],
-      quiz: quiz
+      quiz: isOpen
         ? {
             date: quiz.quiz_date,
             session: quiz.session,
@@ -47,6 +49,8 @@ export async function GET() {
             questions: (quiz.questions || []).map(stripAnswers),
           }
         : null,
+      // 문제는 등록돼 있지만 아직 게시(공개) 전인 경우, 학생 화면에서 다른 안내 문구를 보여주기 위한 값
+      pendingPublish: !!(quiz && !quiz.is_open),
     },
     { headers: { "Cache-Control": "no-store, max-age=0, must-revalidate" } }
   );

@@ -19,6 +19,7 @@ const MIN_MC_CORRECT = 2;
 export default function Home() {
   const [loading, setLoading] = useState(true);
   const [quiz, setQuiz] = useState<Quiz | null>(null);
+  const [pendingPublish, setPendingPublish] = useState(false);
   const [students, setStudents] = useState<Student[]>([]);
   const [name, setName] = useState("");
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -31,6 +32,7 @@ export default function Home() {
       .then((r) => r.json())
       .then((d) => {
         setQuiz(d.quiz);
+        setPendingPublish(!!d.pendingPublish);
         setStudents(d.students || []);
         setLoading(false);
       })
@@ -92,7 +94,14 @@ export default function Home() {
         <div className="qa-hero-rule" />
       </div>
 
-      {!quiz && (
+      {!quiz && pendingPublish && (
+        <div className="qa-center-pad">
+          <p>오늘 퀴즈는 아직 게시되지 않았어요.</p>
+          <p className="qa-muted">잠시 후 다시 확인해주세요.</p>
+        </div>
+      )}
+
+      {!quiz && !pendingPublish && (
         <div className="qa-center-pad">
           <p>오늘 등록된 퀴즈가 없어요.</p>
           <p className="qa-muted">담당 교역자에게 문의해주세요.</p>

@@ -101,6 +101,9 @@ function QuizTab({ showToast }: { showToast: (m: string) => void }) {
   const [title, setTitle] = useState("오늘의 퀴즈");
   const [session, setSession] = useState(1);
   const [questions, setQuestions] = useState<Question[]>(blankQuestions());
+  const [isOpen, setIsOpen] = useState(false);
+  const [quizExists, setQuizExists] = useState(false);
+  const [toggling, setToggling] = useState(false);
   const [subs, setSubs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -120,10 +123,14 @@ function QuizTab({ showToast }: { showToast: (m: string) => void }) {
             ? data.quiz.questions
             : blankQuestions()
         );
+        setIsOpen(!!data.quiz.isOpen);
+        setQuizExists(true);
       } else {
         setTitle("오늘의 퀴즈");
         setSession(1);
         setQuestions(blankQuestions());
+        setIsOpen(false);
+        setQuizExists(false);
       }
       setSubs(data.submissions || []);
     } finally {
@@ -147,23 +154,41 @@ function QuizTab({ showToast }: { showToast: (m: string) => void }) {
     const res = await fetch("/api/admin/quiz", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ date, session, title, questions }),
+      body: JSON.stringify({ date, session, title, questions, isOpen }),
     });
     setSaving(false);
     showToast(res.ok ? "저장되었습니다." : "저장에 실패했습니다.");
     if (res.ok) load(date);
   }
 
+  async function toggleOpen() {
+    const next = !isOpen;
+    setToggling(true);
+    const res = await fetch("/api/admin/quiz", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ date, isOpen: next }),
+    });
+    setToggling(false);
+    if (res.ok) {
+      setIsOpen(next);
+      showToast(next ? "퀴즈를 게시했습니다. 학생들이 볼 수 있어요." : "게시를 중지했습니다.");
+    } else {
+      showToast("처리에 실패했습니다.");
+    }
+  }
+
   async function copyToTarget() {
     if (!copyTarget) return;
     setCopying(true);
+    // 복사된 퀴즈는 항상 '게시 안 됨' 상태로 만들어집니다. 해당 날짜가 되면 직접 게시해주세요.
     const res = await fetch("/api/admin/quiz", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ date: copyTarget, session, title, questions }),
+      body: JSON.stringify({ date: copyTarget, session, title, questions, isOpen: false }),
     });
     setCopying(false);
-    showToast(res.ok ? `${copyTarget}로 ${session}회차 문제를 동일하게 복사했습니다.` : "복사에 실패했습니다.");
+    showToast(res.ok ? `${copyTarget}로 ${session}회차 문제를 동일하게 복사했습니다. (게시 안 됨 상태)` : "복사에 실패했습니다.");
   }
 
   async function allowRetake(studentId: string) {
@@ -224,6 +249,30 @@ function QuizTab({ showToast }: { showToast: (m: string) => void }) {
                   </select>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <div className="qa-card qa-publish-card">
+            <div className="qa-row-between">
+              <div>
+                <h4 style={{ margin: "0 0 4px", fontSize: 14, color: "var(--navy-900)" }}>게시 상태</h4>
+                {quizExists ? (
+                  <span className={"qa-pill " + (isOpen ? "active" : "inactive")}>
+                    {isOpen ? "게시 중 · 학생에게 보임" : "게시 안 됨 · 학생에게 숨김"}
+                  </span>
+                ) : (
+                  <span className="qa-muted">먼저 문제를 저장하면 게시할 수 있어요.</span>
+                )}
+              </div>
+              {quizExists && (
+                <button
+                  className={"qa-btn qa-btn-sm " + (isOpen ? "qa-btn-danger" : "")}
+                  onClick={toggleOpen}
+                  disabled={toggling}
+                >
+                  {toggling ? "처리 중..." : isOpen ? "게시 중지하기" : "지금 게시하기"}
+                </button>
+              )}
             </div>
           </div>
 
