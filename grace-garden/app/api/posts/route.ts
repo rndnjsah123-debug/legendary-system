@@ -1,21 +1,18 @@
 import { supabaseAdmin } from "../../../lib/supabaseAdmin";
 import { clientIp, isSameOrigin, json } from "../../../lib/http";
 import { hit } from "../../../lib/rateLimit";
-import { toPost, type PostRow } from "../../../lib/posts";
+import { fetchLatestPosts, toPost, type PostRow } from "../../../lib/posts";
 
 export const dynamic = "force-dynamic";
 
-// 공개: 최신 글 조회 (정원에 표시)
+// 공개: 최신 글 조회 (정원에 표시, 댓글 포함)
 export async function GET() {
-  const { data, error } = await supabaseAdmin
-    .from("grace_posts")
-    .select("id,name,body,created_at")
-    .order("created_at", { ascending: false })
-    .limit(1000);
-  if (error) {
+  try {
+    const rows = await fetchLatestPosts();
+    return json({ posts: rows.map(toPost) });
+  } catch {
     return json({ error: "글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요." }, 503);
   }
-  return json({ posts: ((data || []) as PostRow[]).map(toPost) });
 }
 
 // 공개: 나눔 글 게시

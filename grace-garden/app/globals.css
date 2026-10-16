@@ -25,3 +25,26 @@
 .danger:hover{background:#fbeeea}
 button.admin-signout{display:block;background:none;border:0;padding:0;margin-top:22px}
 .admin-card form .privacy{margin:6px 0 0}
+
+/* ---- 댓글 ---- */
+.note-meta{display:flex;align-items:center;gap:9px}
+.note-count{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#6f7b62}
+.comments{margin-top:34px;padding-top:24px;border-top:1px solid #dce0d0;text-align:left}
+.comments h3{display:flex;align-items:center;gap:7px;margin:0 0 14px;font-family:'Gowun Batang',serif;font-size:17px;font-weight:700}
+.comments ul{list-style:none;margin:0 0 6px;padding:0;display:grid;gap:10px}
+.comments li{background:#ffffffb3;border:1px solid #e3e7d8;border-radius:9px;padding:13px 15px}
+.comment-head{display:flex;justify-content:space-between;gap:12px;font-size:11px;color:#7e8b71}
+.comment-head b{font-weight:600;color:#4b5b43;overflow-wrap:anywhere}
+.comment-head span{font-size:10px;white-space:nowrap}
+.comments li>p{margin:7px 0 0;font-size:13px;line-height:1.8;color:#4b5343;white-space:pre-wrap;overflow-wrap:anywhere}
+.comments-empty{font-size:12px;color:#8b9382;margin:0 0 6px}
+.comments textarea{min-height:84px}
+.comments form label:first-child{margin-top:10px}
+
+/* ---- 관리자: 댓글 ---- */
+.admin-comments{list-style:none;margin:14px 0 0;padding:12px 0 0;border-top:1px dashed #dce2cf;display:grid;gap:8px}
+.admin-comment{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;background:#f6f7ef;border-radius:8px;padding:10px 12px;font-size:12px}
+.admin-comment b{font-weight:600}
+.admin-comment small{color:#8b9382;font-size:10px}
+.admin-comment span{display:block;margin-top:4px;line-height:1.7;color:#4b5343;white-space:pre-wrap;overflow-wrap:anywhere}
+.danger.small{padding:5px 9px;font-size:11px}

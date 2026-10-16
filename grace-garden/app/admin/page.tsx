@@ -2,7 +2,8 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { ArrowLeft, Download, RefreshCw, Search, ShieldCheck, Sprout, Trash2 } from 'lucide-react';
 
-type Post = { id: string; name: string; body: string; createdAt: string };
+type Comment = { id: string; name: string; body: string; createdAt: string };
+type Post = { id: string; name: string; body: string; createdAt: string; comments: Comment[] };
 
 function fmt(value: string) {
   return new Date(value).toLocaleString('ko-KR', {
@@ -84,16 +85,16 @@ export default function Admin() {
     setNotice('');
   }
 
-  async function download() {
+  async function download(kind: 'posts' | 'comments') {
     setBusy(true);
     setError('');
     try {
-      const r = await fetch('/api/admin/export', { cache: 'no-store' });
+      const r = await fetch(kind === 'posts' ? '/api/admin/export' : '/api/admin/export-comments', { cache: 'no-store' });
       if (!r.ok) throw Error(((await r.json()) as { error: string }).error);
       const url = URL.createObjectURL(await r.blob());
       const a = document.createElement('a');
       a.href = url;
-      a.download = '수지함께하는교회_2026특새_은혜나눔.csv';
+      a.download = kind === 'posts' ? '수지함께하는교회_2026특새_은혜나눔.csv' : '수지함께하는교회_2026특새_댓글.csv';
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (e) {
@@ -125,7 +126,36 @@ export default function Admin() {
     }
   }
 
-  const filtered = posts.filter((p) => !query || (p.name + ' ' + p.body).includes(query));
+  async function removeComment(p: Post, c: Comment) {
+    if (!window.confirm(`"${c.name}" 님의 댓글을 삭제할까요?\n삭제하면 되돌릴 수 없어요.`)) return;
+    setDeleting(c.id);
+    setError('');
+    setNotice('');
+    try {
+      const r = await fetch(`/api/admin/comments?id=${encodeURIComponent(c.id)}`, { method: 'DELETE' });
+      const d = (await r.json().catch(() => ({}))) as { error?: string };
+      if (r.status === 401) {
+        setAuthorized(false);
+        return;
+      }
+      if (!r.ok && r.status !== 404) throw Error(d.error || '삭제하지 못했습니다.');
+      setPosts((list) =>
+        list.map((x) => (x.id === p.id ? { ...x, comments: x.comments.filter((y) => y.id !== c.id) } : x))
+      );
+      setNotice(`"${c.name}" 님의 댓글을 삭제했어요. 정원에는 잠시 후(최대 20초) 반영돼요.`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '삭제하지 못했습니다.');
+    } finally {
+      setDeleting(null);
+    }
+  }
+
+  const totalComments = posts.reduce((n, p) => n + p.comments.length, 0);
+  const filtered = posts.filter(
+    (p) =>
+      !query ||
+      (p.name + ' ' + p.body + ' ' + p.comments.map((c) => c.name + ' ' + c.body).join(' ')).includes(query)
+  );
 
   return (
     <main className="admin-page">
@@ -161,15 +191,19 @@ export default function Admin() {
               <button className="ghost" onClick={loadPosts} disabled={loadingPosts}>
                 <RefreshCw size={15} /> 새로고침
               </button>
-              <button className="primary" disabled={busy} onClick={download}>
+              <button className="primary" disabled={busy} onClick={() => download('posts')}>
                 <Download size={16} />
-                {busy ? '파일 준비 중…' : 'CSV 다운로드'}
+                {busy ? '파일 준비 중…' : '글 CSV'}
+              </button>
+              <button className="primary" disabled={busy} onClick={() => download('comments')}>
+                <Download size={16} />
+                댓글 CSV
               </button>
             </div>
             <p className="privacy">
-              총 {posts.length.toLocaleString()}개{query && ` · 검색 결과 ${filtered.length.toLocaleString()}개`}
+              글 {posts.length.toLocaleString()}개 · 댓글 {totalComments.toLocaleString()}개{query && ` · 검색 결과 글 ${filtered.length.toLocaleString()}개`}
               <br />
-              삭제한 글은 되돌릴 수 없어요. 필요하면 먼저 CSV로 백업해 두세요.
+              삭제한 글·댓글은 되돌릴 수 없어요. 글을 지우면 그 글의 댓글도 함께 지워져요. 필요하면 먼저 CSV로 백업해 두세요.
             </p>
             {notice && <p className="notice">{notice}</p>}
 
@@ -191,6 +225,25 @@ export default function Admin() {
                       </button>
                     </div>
                     <p>{p.body}</p>
+                    {p.comments.length > 0 && (
+                      <ul className="admin-comments">
+                        {p.comments.map((c) => (
+                          <li key={c.id} className="admin-comment">
+                            <div>
+                              <b>{c.name}</b> <small>{fmt(c.createdAt)}</small>
+                              <span>{c.body}</span>
+                            </div>
+                            <button
+                              className="danger small"
+                              disabled={deleting === c.id}
+                              onClick={() => removeComment(p, c)}
+                            >
+                              <Trash2 size={12} /> {deleting === c.id ? '삭제 중…' : '삭제'}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </li>
                 ))}
               </ul>

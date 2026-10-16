@@ -41,3 +41,14 @@ $$;
 
 revoke all on function grace_hit(text, bigint, bigint) from public, anon, authenticated;
 grant execute on function grace_hit(text, bigint, bigint) to service_role;
+
+-- ==== 댓글 (v2) ====
+create table if not exists grace_comments (
+  id uuid primary key default gen_random_uuid(),
+  post_id uuid not null references grace_posts(id) on delete cascade,
+  name text not null check (char_length(name) between 1 and 30),
+  body text not null check (char_length(body) between 1 and 500),
+  created_at timestamptz not null default now()
+);
+create index if not exists grace_comments_post_idx on grace_comments (post_id, created_at);
+alter table grace_comments enable row level security;
