@@ -48,3 +48,22 @@ button.admin-signout{display:block;background:none;border:0;padding:0;margin-top
 .admin-comment small{color:#8b9382;font-size:10px}
 .admin-comment span{display:block;margin-top:4px;line-height:1.7;color:#4b5343;white-space:pre-wrap;overflow-wrap:anywhere}
 .danger.small{padding:5px 9px;font-size:11px}
+
+/* ---- 수정: 휴대폰에서 목록 보기가 잘리던 문제 (고정 높이 해제) ---- */
+.board.list-board{height:auto;min-height:450px;overflow:visible}
+
+/* ---- 글 넘기기(이전/다음, 스와이프) ---- */
+.detail{touch-action:pan-y pinch-zoom}
+.detail-nav{display:flex;align-items:center;gap:8px;margin:-8px 0 22px;padding-right:42px}
+.detail-nav button{display:inline-flex;align-items:center;gap:6px;border:1px solid #d6dccb;background:#fff;color:#4b5b43;border-radius:20px;padding:8px 14px;font-size:12px}
+.detail-nav button:hover:not(:disabled){background:#eef1e4}
+.detail-nav button:disabled{opacity:.35;cursor:default}
+.detail-nav .pos{min-width:66px;text-align:center;font-family:Georgia,serif;font-size:13px;color:#6d7a62}
+.detail-nav.bottom{margin:30px 0 0;padding-right:0;justify-content:space-between}
+.swipe-hint{display:none;text-align:center;font-size:10px;color:#9aa18f;margin-top:14px}
+@media (hover:none){.swipe-hint{display:block}}
+.detail-slide.next{animation:slideNext .28s ease both}
+.detail-slide.prev{animation:slidePrev .28s ease both}
+@keyframes slideNext{from{opacity:0;transform:translateX(34px)}to{opacity:1;transform:none}}
+@keyframes slidePrev{from{opacity:0;transform:translateX(-34px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.detail-slide.next,.detail-slide.prev{animation:none}}
