@@ -67,3 +67,21 @@ button.admin-signout{display:block;background:none;border:0;padding:0;margin-top
 @keyframes slideNext{from{opacity:0;transform:translateX(34px)}to{opacity:1;transform:none}}
 @keyframes slidePrev{from{opacity:0;transform:translateX(-34px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.detail-slide.next,.detail-slide.prev{animation:none}}
+
+/* ---- 이모티콘 반응 ---- */
+.note-bottom b{min-width:0;flex:1}
+.note-meta{flex-shrink:0}
+.note-react{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#6f7b62}
+.note-react span{font-size:11px;letter-spacing:-1px}
+.reactions-wrap{margin-top:22px}
+.reactions{display:flex;flex-wrap:wrap;gap:8px}
+.reaction{display:inline-flex;align-items:center;gap:6px;border:1px solid #d9dfcd;background:#fff;border-radius:22px;padding:7px 13px;font-size:13px;min-height:38px;transition:transform .12s,background .15s,border-color .15s}
+.reaction .emoji{font-size:18px;line-height:1}
+.reaction .rcount{font-size:12px;color:#6d7a62;min-width:6px;text-align:left}
+.reaction:hover{background:#f1f4e8}
+.reaction:active{transform:scale(.92)}
+.reaction.on{background:#e4edd0;border-color:#86a46d}
+.reaction.on .rcount{color:#35513a;font-weight:600}
+.reactions-hint{font-size:10px;color:#98a08c;margin:9px 0 0}
+
+.admin-post-head small.admin-reacts{font-size:12px;color:#4b5b43;margin-top:5px}

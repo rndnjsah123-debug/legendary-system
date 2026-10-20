@@ -13,14 +13,41 @@ export function toComment(c: CommentRow) {
   return { id: c.id, name: c.name, body: c.body, createdAt: c.created_at };
 }
 
-export function toPost(r: PostRow) {
+export const REACTION_KEYS = ["heart", "thumbs", "pray", "smile", "tear"] as const;
+export type Counts = Record<string, number>;
+
+export function toPost(r: PostRow, reactions?: Counts) {
   return {
     id: r.id,
     name: r.name,
     body: r.body,
     createdAt: r.created_at,
     comments: (r.grace_comments || []).map(toComment),
+    reactions: reactions || {},
   };
+}
+
+// 글별 이모티콘 반응 개수 { 글id: { heart: 3, thumbs: 1 } }
+// 반응 표가 아직 없는 경우에도 글은 그대로 보이도록 빈 값을 돌려줍니다.
+export async function fetchReactionCounts(): Promise<Record<string, Counts>> {
+  try {
+    const out: Record<string, Counts> = {};
+    const size = 1000;
+    for (let from = 0; ; from += size) {
+      const { data, error } = await supabaseAdmin
+        .from("grace_reaction_summary")
+        .select("post_id,counts")
+        .order("post_id")
+        .range(from, from + size - 1);
+      if (error) throw error;
+      const rows = (data || []) as unknown as { post_id: string; counts: Counts | null }[];
+      for (const r of rows) out[r.post_id] = r.counts || {};
+      if (rows.length < size) break;
+    }
+    return out;
+  } catch {
+    return {};
+  }
 }
 
 const POST_COLS = "id,name,body,created_at";

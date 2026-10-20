@@ -52,3 +52,26 @@ create table if not exists grace_comments (
 );
 create index if not exists grace_comments_post_idx on grace_comments (post_id, created_at);
 alter table grace_comments enable row level security;
+
+-- ==== 이모티콘 반응 (v3) ====
+-- 기기(브라우저)당 글 하나에 반응 1개. 다른 이모티콘을 누르면 바뀌고, 같은 걸 다시 누르면 취소됩니다.
+create table if not exists grace_reactions (
+  post_id uuid not null references grace_posts(id) on delete cascade,
+  client_id text not null check (char_length(client_id) between 8 and 64),
+  reaction text not null check (reaction in ('heart','thumbs','pray','smile','tear')),
+  created_at timestamptz not null default now(),
+  primary key (post_id, client_id)
+);
+create index if not exists grace_reactions_post_idx on grace_reactions (post_id);
+alter table grace_reactions enable row level security;
+
+-- 글별 반응 개수 요약 (정원 화면이 한 번에 가져오기 위한 보기)
+create or replace view grace_reaction_summary as
+select post_id, jsonb_object_agg(reaction, cnt) as counts
+from (
+  select post_id, reaction, count(*)::int as cnt
+  from grace_reactions
+  group by post_id, reaction
+) t
+group by post_id;
+revoke all on grace_reaction_summary from anon, authenticated;

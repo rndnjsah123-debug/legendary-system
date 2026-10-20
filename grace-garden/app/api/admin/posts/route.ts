@@ -1,7 +1,7 @@
 import { supabaseAdmin } from "../../../../lib/supabaseAdmin";
 import { json } from "../../../../lib/http";
 import { requireAdmin } from "../../../../lib/requireAdmin";
-import { fetchAllPosts, toPost } from "../../../../lib/posts";
+import { fetchAllPosts, fetchReactionCounts, toPost } from "../../../../lib/posts";
 
 export const dynamic = "force-dynamic";
 
@@ -9,8 +9,8 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   if (!(await requireAdmin())) return json({ error: "관리자 로그인이 필요합니다." }, 401);
   try {
-    const rows = await fetchAllPosts(false);
-    return json({ posts: rows.map(toPost) });
+    const [rows, counts] = await Promise.all([fetchAllPosts(false), fetchReactionCounts()]);
+    return json({ posts: rows.map((r) => toPost(r, counts[r.id])) });
   } catch {
     return json({ error: "글 목록을 불러오지 못했습니다. 다시 시도해 주세요." }, 503);
   }

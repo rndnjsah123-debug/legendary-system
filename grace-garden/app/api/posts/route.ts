@@ -1,15 +1,15 @@
 import { supabaseAdmin } from "../../../lib/supabaseAdmin";
 import { clientIp, isSameOrigin, json } from "../../../lib/http";
 import { hit } from "../../../lib/rateLimit";
-import { fetchLatestPosts, toPost, type PostRow } from "../../../lib/posts";
+import { fetchLatestPosts, fetchReactionCounts, toPost, type PostRow } from "../../../lib/posts";
 
 export const dynamic = "force-dynamic";
 
 // 공개: 최신 글 조회 (정원에 표시, 댓글 포함)
 export async function GET() {
   try {
-    const rows = await fetchLatestPosts();
-    return json({ posts: rows.map(toPost) });
+    const [rows, counts] = await Promise.all([fetchLatestPosts(), fetchReactionCounts()]);
+    return json({ posts: rows.map((r) => toPost(r, counts[r.id])) });
   } catch {
     return json({ error: "글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요." }, 503);
   }

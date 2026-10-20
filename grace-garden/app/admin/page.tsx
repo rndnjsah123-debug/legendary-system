@@ -3,7 +3,11 @@ import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { ArrowLeft, Download, RefreshCw, Search, ShieldCheck, Sprout, Trash2 } from 'lucide-react';
 
 type Comment = { id: string; name: string; body: string; createdAt: string };
-type Post = { id: string; name: string; body: string; createdAt: string; comments: Comment[] };
+type Post = { id: string; name: string; body: string; createdAt: string; comments: Comment[]; reactions?: Record<string, number> };
+const REACTION_LABELS: [string, string][] = [['heart', '❤️'], ['thumbs', '👍'], ['pray', '🙏'], ['smile', '😊'], ['tear', '😢']];
+function reactionText(p: Post) {
+  return REACTION_LABELS.filter(([k]) => (p.reactions?.[k] || 0) > 0).map(([k, e]) => `${e} ${p.reactions![k]}`).join('  ');
+}
 
 function fmt(value: string) {
   return new Date(value).toLocaleString('ko-KR', {
@@ -219,6 +223,7 @@ export default function Admin() {
                       <div>
                         <b>{p.name}</b>
                         <small>{fmt(p.createdAt)}</small>
+                        {reactionText(p) && <small className="admin-reacts">{reactionText(p)}</small>}
                       </div>
                       <button className="danger" disabled={deleting === p.id} onClick={() => remove(p)}>
                         <Trash2 size={14} /> {deleting === p.id ? '삭제 중…' : '삭제'}
